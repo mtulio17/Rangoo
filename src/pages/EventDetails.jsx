@@ -98,9 +98,14 @@ function EventDetails() {
           }
         })
 
-        const { error } = await supabase.from("availabilities").insert(availabilityRecords)
-
-        if (error) throw error
+        // Insertar los registros uno por uno para evitar problemas con la restricción única
+        for (const record of availabilityRecords) {
+          const { error } = await supabase.from("availabilities").insert([record])
+          if (error) {
+            console.error("Error inserting availability:", error)
+            throw error
+          }
+        }
       }
 
       setHasSubmitted(true)
@@ -124,7 +129,7 @@ function EventDetails() {
       alert("¡Tus disponibilidades han sido guardadas!")
     } catch (err) {
       console.error("Error submitting availabilities:", err)
-      alert("Error al guardar tus disponibilidades")
+      alert(`Error al guardar tus disponibilidades: ${err.message || "Error desconocido"}`)
     }
   }
 
